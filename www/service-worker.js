@@ -5,7 +5,7 @@
    ========================================================= */
 'use strict';
 
-const CACHE_VERSION = 'tuisyen-smart-v2';
+const CACHE_VERSION = 'tuisyen-smart-v3';
 
 const APP_SHELL = [
   './',
@@ -13,6 +13,14 @@ const APP_SHELL = [
   './style.css',
   './app.js',
   './db.js',
+  './js/students.js',
+  './js/catalog.js',
+  './js/schedule.js',
+  './js/billing.js',
+  './js/expenses.js',
+  './js/academic.js',
+  './js/reports.js',
+  './js/backup.js',
   './manifest.json',
   './icons/icon.svg',
   './icons/icon-192.png',

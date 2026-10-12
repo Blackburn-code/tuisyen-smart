@@ -1,10 +1,12 @@
 /* =========================================================
-   Tuisyen Smart - app.js
-   Fasa 1: Rangka dashboard, navigasi, utiliti, tetapan asas
+   Tuisyen Smart - app.js (teras)
+   Navigasi, utiliti, komponen UI, tetapan, kewangan asas,
+   dashboard, cetakan dan simpan fail.
+   Modul lain (js/*.js) mendaftar paparan melalui App.view().
    ========================================================= */
 'use strict';
 
-const APP_VERSION = '0.1.0 · Fasa 1';
+const APP_VERSION = '1.0.0';
 
 /* ---------------- Ikon (SVG tempatan) ---------------- */
 const ICONS = {
@@ -27,7 +29,19 @@ const ICONS = {
   print: '<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',
   save: '<path d="M5 3h11l5 5v13H3V3z"/><path d="M7 3v6h8M7 21v-7h10v7"/>',
   trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
-  flask: '<path d="M9 3h6M10 3v6L4 20a1 1 0 0 0 1 1.5h14A1 1 0 0 0 20 20L14 9V3"/><path d="M7 15h10"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  download: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/>',
+  upload: '<path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 3h16"/>',
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  left: '<path d="M15 18l-6-6 6-6"/>',
+  right: '<path d="M9 18l6-6-6-6"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  csv: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13l3 4M11 13l-3 4M14 13h3v4h-3"/>'
 };
 
 function icon(name, cls) {
@@ -36,85 +50,82 @@ function icon(name, cls) {
 
 /* ---------------- Menu utama ---------------- */
 const MENU = [
-  { id: 'dashboard', label: 'Dashboard', phase: 1 },
-  { id: 'pelajar', label: 'Pelajar', phase: 2,
-    plan: ['Tambah, kemas kini dan cari pelajar', 'ID pelajar unik automatik', 'Tapis ikut status, sekolah dan tingkatan', 'Nyahaktif tanpa padam sejarah kewangan'] },
-  { id: 'subjek', label: 'Subjek', phase: 3,
-    plan: ['Daftar subjek dan kadar tersendiri', 'Caj bulanan, setiap kelas atau mengikut jam', 'Pendaftaran subjek pelajar dengan kadar dikunci'] },
-  { id: 'pakej', label: 'Pakej Tuisyen', phase: 3,
-    plan: ['Pakej beberapa subjek pada satu harga', 'Elak caj berulang bagi subjek dalam pakej'] },
-  { id: 'jadual', label: 'Jadual Kelas', phase: 4,
-    plan: ['Paparan harian, mingguan dan bulanan', 'Semakan pertindihan jadual', 'Kelas ganti dan kelas dibatalkan', 'Amaran kelas hampir bermula'] },
-  { id: 'kehadiran', label: 'Kehadiran', phase: 4,
-    plan: ['Status hadir, tidak hadir, lewat, cuti, dibatalkan', 'Peratus kehadiran automatik', 'Elak rekod berganda bagi kelas yang sama'] },
-  { id: 'yuran', label: 'Yuran dan Bil', phase: 5,
-    plan: ['Bil manual dan bil bulanan pukal', 'Diskaun dan caj tambahan', 'Semakan bil pendua', 'Status bil automatik'] },
-  { id: 'bayaran', label: 'Bayaran dan Resit', phase: 5,
-    plan: ['Tunai, pindahan bank, DuitNow', 'Bayaran separa dan agihan ke beberapa bil', 'Kredit lebihan bayaran', 'Cetak resit'] },
-  { id: 'perbelanjaan', label: 'Perbelanjaan', phase: 6,
-    plan: ['Rekod perbelanjaan dan kategori', 'Laporan bulanan dan ikut kategori'] },
-  { id: 'prestasi', label: 'Prestasi Akademik', phase: 7,
-    plan: ['Rekod ujian dan markah', 'Peratus dan gred automatik', 'Graf perkembangan mengikut subjek'] },
-  { id: 'laporan', label: 'Laporan', phase: 6,
-    plan: ['Laporan pelajar, kehadiran, bil, kutipan', 'Ringkasan kewangan', 'Cetak dan eksport CSV'] },
-  { id: 'sandaran', label: 'Sandaran Data', phase: 8,
-    plan: ['Eksport seluruh data ke JSON', 'Import dan pemulihan dengan semakan', 'Panduan pindah data Android ↔ PC'] },
-  { id: 'tetapan', label: 'Tetapan', phase: 1 }
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'pelajar', label: 'Pelajar' },
+  { id: 'subjek', label: 'Subjek' },
+  { id: 'pakej', label: 'Pakej Tuisyen' },
+  { id: 'jadual', label: 'Jadual Kelas' },
+  { id: 'kehadiran', label: 'Kehadiran' },
+  { id: 'yuran', label: 'Yuran dan Bil' },
+  { id: 'bayaran', label: 'Bayaran dan Resit' },
+  { id: 'perbelanjaan', label: 'Perbelanjaan' },
+  { id: 'prestasi', label: 'Prestasi Akademik' },
+  { id: 'laporan', label: 'Laporan' },
+  { id: 'sandaran', label: 'Sandaran Data' },
+  { id: 'tetapan', label: 'Tetapan' }
 ];
 
 /* ---------------- Utiliti ---------------- */
 const U = {
   pad(n) { return String(n).padStart(2, '0'); },
 
-  // Tarikh tempatan dalam format YYYY-MM-DD (format simpanan)
   toISODate(d) {
     d = d || new Date();
     return `${d.getFullYear()}-${U.pad(d.getMonth() + 1)}-${U.pad(d.getDate())}`;
   },
   todayISO() { return U.toISODate(new Date()); },
-
-  addDaysISO(iso, days) {
-    const [y, m, d] = iso.split('-').map(Number);
-    const dt = new Date(y, m - 1, d + days);
-    return U.toISODate(dt);
-  },
-
+  parseISO(iso) { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); },
+  addDaysISO(iso, days) { const d = U.parseISO(iso); d.setDate(d.getDate() + days); return U.toISODate(d); },
   daysBetween(fromISO, toISO) {
-    const [a, b] = [fromISO, toISO].map(s => {
-      const [y, m, d] = s.split('-').map(Number);
-      return Date.UTC(y, m - 1, d);
-    });
-    return Math.round((b - a) / 86400000);
+    const f = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+    return Math.round((f(toISO) - f(fromISO)) / 86400000);
   },
+  monthStart(key) { return key + '-01'; },
+  monthEnd(key) {
+    const [y, m] = key.split('-').map(Number);
+    return U.toISODate(new Date(y, m, 0));
+  },
+  addMonths(key, n) {
+    const [y, m] = key.split('-').map(Number);
+    const d = new Date(y, m - 1 + n, 1);
+    return `${d.getFullYear()}-${U.pad(d.getMonth() + 1)}`;
+  },
+  isISODate(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(U.parseISO(s)); },
+  inRange(iso, from, to) { return !!iso && (!from || iso >= from) && (!to || iso <= to); },
 
-  // Paparan DD/MM/YYYY
   formatDate(iso) {
     if (!iso || typeof iso !== 'string') return '—';
     const p = iso.slice(0, 10).split('-');
     if (p.length !== 3) return '—';
     return `${p[2]}/${p[1]}/${p[0]}`;
   },
-
-  dayName(d) {
-    return ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'][d.getDay()];
+  formatDateTime(isoTs) {
+    if (!isoTs) return '—';
+    const d = new Date(isoTs);
+    if (isNaN(d)) return '—';
+    return `${U.formatDate(U.toISODate(d))} ${U.pad(d.getHours())}:${U.pad(d.getMinutes())}`;
   },
-
+  dayName(d) { return ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'][d.getDay()]; },
+  dayShort(d) { return ['Ahd', 'Isn', 'Sel', 'Rab', 'Kha', 'Jum', 'Sab'][d.getDay()]; },
   monthName(m) {
     return ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos',
-            'September', 'Oktober', 'November', 'Disember'][m];
+      'September', 'Oktober', 'November', 'Disember'][m];
   },
+  monthLabel(key) { const [y, m] = key.split('-').map(Number); return `${U.monthName(m - 1)} ${y}`; },
 
-  // Wang disimpan dalam SEN (integer). Paparan: RM1,234.50
+  // Wang disimpan dalam SEN (integer)
   formatRM(sen) {
     const n = Number.isFinite(sen) ? Math.round(sen) : 0;
     const neg = n < 0;
     const abs = Math.abs(n);
     const ringgit = Math.floor(abs / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    const s = U.pad(abs % 100);
-    return `${neg ? '-' : ''}RM${ringgit}.${s}`;
+    return `${neg ? '-' : ''}RM${ringgit}.${U.pad(abs % 100)}`;
   },
-
-  // Tukar input pengguna "12.50" / "RM 1,200" kepada sen. Pulang null jika tidak sah.
+  senToInput(sen) {
+    if (!Number.isFinite(sen)) return '';
+    const neg = sen < 0; const a = Math.abs(Math.round(sen));
+    return `${neg ? '-' : ''}${Math.floor(a / 100)}.${U.pad(a % 100)}`;
+  },
   toSen(input) {
     if (input === null || input === undefined) return null;
     const str = String(input).replace(/rm/i, '').replace(/[,\s]/g, '');
@@ -125,24 +136,43 @@ const U = {
     return neg ? -sen : sen;
   },
 
-  sum(arr, fn) { return arr.reduce((t, x) => t + (Number(fn(x)) || 0), 0); },
-
+  sum(arr, fn) { return arr.reduce((t, x) => t + (Number(fn ? fn(x) : x) || 0), 0); },
   minutesOf(hhmm) {
     if (!hhmm || !/^\d{1,2}:\d{2}/.test(hhmm)) return null;
     const [h, m] = hhmm.split(':').map(Number);
     return h * 60 + m;
   },
-
   nowMinutes() { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); },
+  durationText(min) {
+    if (!Number.isFinite(min) || min <= 0) return '—';
+    const h = Math.floor(min / 60), m = min % 60;
+    return (h ? h + ' jam ' : '') + (m ? m + ' minit' : '').trim() || '0 minit';
+  },
+  pct(n) { return Number.isFinite(n) ? (Math.round(n * 10) / 10).toFixed(1) + '%' : '—'; },
 
   esc(s) {
     return String(s === null || s === undefined ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  },
+  norm(s) { return String(s || '').toLowerCase().trim(); },
+  byName(a, b) { return String(a.name || '').localeCompare(String(b.name || ''), 'ms'); },
+  mapBy(arr, key) { return new Map(arr.map(x => [x[key || 'id'], x])); },
+  groupBy(arr, fn) {
+    const m = new Map();
+    arr.forEach(x => { const k = fn(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); });
+    return m;
+  },
+  options(list, value, placeholder) {
+    const ph = placeholder !== undefined ? `<option value="">${U.esc(placeholder)}</option>` : '';
+    return ph + list.map(o => {
+      const [v, t] = Array.isArray(o) ? o : [o, o];
+      return `<option value="${U.esc(v)}" ${String(v) === String(value) ? 'selected' : ''}>${U.esc(t)}</option>`;
+    }).join('');
   }
 };
 
-/* ---------------- Notifikasi (toast) ---------------- */
+/* ---------------- Notifikasi ---------------- */
 function toast(message, type) {
   const area = document.getElementById('toastArea');
   const el = document.createElement('div');
@@ -150,60 +180,400 @@ function toast(message, type) {
   el.setAttribute('role', type === 'error' ? 'alert' : 'status');
   el.textContent = message;
   area.appendChild(el);
-  setTimeout(() => {
-    el.classList.add('hide');
-    setTimeout(() => el.remove(), 250);
-  }, type === 'error' ? 5000 : 3000);
+  while (area.children.length > 4) area.firstElementChild.remove();
+  setTimeout(() => { el.classList.add('hide'); setTimeout(() => el.remove(), 250); },
+    type === 'error' ? 5000 : 3000);
 }
 
-/* ---------------- Dialog pengesahan ---------------- */
+/* ---------------- Modal ---------------- */
+const modalStack = [];
+
+function openModal({ title, body, footer, size }) {
+  const root = document.getElementById('modalRoot');
+  const wrap = document.createElement('div');
+  wrap.className = 'modal-backdrop';
+  wrap.innerHTML = `
+    <div class="modal ${size || ''}" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h3>${U.esc(title || '')}</h3>
+        <button type="button" class="icon-btn modal-x" data-close aria-label="Tutup">${icon('close')}</button>
+      </div>
+      <div class="modal-body">${body || ''}</div>
+      ${footer ? `<div class="modal-foot">${footer}</div>` : ''}
+    </div>`;
+  root.appendChild(wrap);
+  document.body.classList.add('modal-open');
+  const prevFocus = document.activeElement;
+  const m = {
+    el: wrap.querySelector('.modal'),
+    wrap,
+    onClose: null,
+    close() {
+      const i = modalStack.indexOf(m);
+      if (i >= 0) modalStack.splice(i, 1);
+      wrap.remove();
+      if (!modalStack.length) document.body.classList.remove('modal-open');
+      if (prevFocus && prevFocus.focus) try { prevFocus.focus(); } catch (e) { /* abaikan */ }
+      if (m.onClose) m.onClose();
+    }
+  };
+  wrap.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => m.close()));
+  modalStack.push(m);
+  return m;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && modalStack.length) { e.stopPropagation(); modalStack[modalStack.length - 1].close(); }
+}, true);
+
 function confirmDialog({ title, message, confirmText, cancelText, danger }) {
   return new Promise(resolve => {
-    const root = document.getElementById('modalRoot');
-    const prevFocus = document.activeElement;
-    root.innerHTML = `
-      <div class="modal-backdrop" role="presentation">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mdTitle">
-          <div class="modal-head"><h3 id="mdTitle">${U.esc(title || 'Sahkan tindakan')}</h3></div>
-          <div class="modal-body">${U.esc(message || '')}</div>
-          <div class="modal-foot">
-            <button class="btn btn-outline" data-act="no">${U.esc(cancelText || 'Batal')}</button>
-            <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-act="yes">${U.esc(confirmText || 'Ya, teruskan')}</button>
-          </div>
-        </div>
-      </div>`;
-    const backdrop = root.firstElementChild;
-    const close = val => {
-      document.removeEventListener('keydown', onKey);
-      root.innerHTML = '';
-      if (prevFocus && prevFocus.focus) prevFocus.focus();
-      resolve(val);
-    };
-    const onKey = e => { if (e.key === 'Escape') close(false); };
-    document.addEventListener('keydown', onKey);
-    backdrop.addEventListener('click', e => {
-      if (e.target === backdrop) close(false);
-      const act = e.target.closest('[data-act]');
-      if (act) close(act.dataset.act === 'yes');
+    let answered = false;
+    const m = openModal({
+      title: title || 'Sahkan tindakan',
+      body: `<p class="confirm-msg">${U.esc(message || '')}</p>`,
+      footer: `<button class="btn btn-outline" data-act="no">${U.esc(cancelText || 'Batal')}</button>
+               <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-act="yes">${U.esc(confirmText || 'Ya, teruskan')}</button>`,
+      size: 'modal-sm'
     });
-    root.querySelector('[data-act="no"]').focus();
+    m.onClose = () => { if (!answered) resolve(false); };
+    m.el.querySelector('[data-act="no"]').addEventListener('click', () => m.close());
+    m.el.querySelector('[data-act="yes"]').addEventListener('click', () => { answered = true; m.close(); resolve(true); });
+    m.el.querySelector('[data-act="no"]').focus();
   });
 }
 
-/* ---------------- Keadaan aplikasi ---------------- */
-const state = {
-  profile: null,
-  renderToken: 0
+/* ---------------- Borang ---------------- */
+const F = {
+  wrap(name, label, input, o) {
+    o = o || {};
+    return `<div class="field ${o.cls || ''}">
+      ${label ? `<label for="f_${name}">${U.esc(label)}${o.req ? ' <span class="req">*</span>' : ''}</label>` : ''}
+      ${input}
+      ${o.help ? `<div class="field-help">${U.esc(o.help)}</div>` : ''}
+      <div class="field-error" data-err="${name}"></div>
+    </div>`;
+  },
+  text(name, label, value, o) {
+    o = o || {};
+    return F.wrap(name, label, `<input id="f_${name}" name="${name}" type="${o.type || 'text'}"
+      value="${U.esc(value === undefined || value === null ? '' : value)}"
+      ${o.placeholder ? `placeholder="${U.esc(o.placeholder)}"` : ''}
+      ${o.max ? `maxlength="${o.max}"` : ''} ${o.attrs || ''}>`, o);
+  },
+  money(name, label, sen, o) {
+    return F.text(name, label, Number.isFinite(sen) ? U.senToInput(sen) : '',
+      Object.assign({ placeholder: '0.00', attrs: 'inputmode="decimal" autocomplete="off"' }, o || {}));
+  },
+  date(name, label, iso, o) { return F.text(name, label, iso || '', Object.assign({ type: 'date' }, o || {})); },
+  time(name, label, v, o) { return F.text(name, label, v || '', Object.assign({ type: 'time' }, o || {})); },
+  number(name, label, v, o) {
+    return F.text(name, label, v, Object.assign({ type: 'number', attrs: 'inputmode="decimal" step="any"' }, o || {}));
+  },
+  select(name, label, list, value, o) {
+    o = o || {};
+    return F.wrap(name, label, `<select id="f_${name}" name="${name}" ${o.attrs || ''}>${U.options(list, value, o.placeholder)}</select>`, o);
+  },
+  textarea(name, label, value, o) {
+    return F.wrap(name, label, `<textarea id="f_${name}" name="${name}" rows="${(o && o.rows) || 2}" maxlength="1000">${U.esc(value || '')}</textarea>`, o);
+  }
 };
 
-/* ---------------- Navigasi ---------------- */
+function formData(form) {
+  const out = {};
+  Array.from(form.elements).forEach(el => {
+    if (!el.name || el.disabled) return;
+    if (el.type === 'checkbox') {
+      if (el.dataset.multi !== undefined) {
+        out[el.name] = out[el.name] || [];
+        if (el.checked) out[el.name].push(el.value);
+      } else out[el.name] = el.checked;
+    } else if (el.type === 'radio') {
+      if (el.checked) out[el.name] = el.value;
+    } else out[el.name] = typeof el.value === 'string' ? el.value.trim() : el.value;
+  });
+  return out;
+}
+
+// errs: { namaMedan: 'mesej' } — pulang true jika tiada ralat
+function showErrors(form, errs) {
+  form.querySelectorAll('[data-err]').forEach(e => { e.textContent = ''; });
+  form.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+  const keys = Object.keys(errs || {}).filter(k => errs[k]);
+  keys.forEach(k => {
+    const box = form.querySelector(`[data-err="${k}"]`);
+    if (box) { box.textContent = errs[k]; const f = box.closest('.field'); if (f) f.classList.add('invalid'); }
+  });
+  if (keys.length) {
+    const first = form.querySelector('.field.invalid input, .field.invalid select, .field.invalid textarea');
+    if (first) first.focus();
+    const unshown = keys.filter(k => !form.querySelector(`[data-err="${k}"]`));
+    toast(unshown.length ? errs[unshown[0]] : 'Sila semak maklumat yang ditanda.', 'error');
+  }
+  return keys.length === 0;
+}
+
+/**
+ * Modal borang dengan butang Simpan yang dilindungi daripada klik berulang.
+ * onSubmit(data, form, modal) — pulangkan false untuk kekalkan modal terbuka.
+ */
+function formModal({ title, body, submitText, size, onOpen, onSubmit, danger }) {
+  const m = openModal({
+    title, size,
+    body: `<form class="modal-form" novalidate>${body}<button type="submit" hidden></button></form>`,
+    footer: `<button type="button" class="btn btn-outline" data-close>Batal</button>
+             <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-submit>${icon('save')} ${U.esc(submitText || 'Simpan')}</button>`
+  });
+  const form = m.el.querySelector('form');
+  const btn = m.el.querySelector('[data-submit]');
+  let busy = false;
+  const submit = async () => {
+    if (busy) return;
+    busy = true; btn.disabled = true;
+    try {
+      const res = await onSubmit(formData(form), form, m);
+      if (res !== false) m.close();
+    } catch (err) {
+      console.error(err);
+      toast(errorText(err), 'error');
+    } finally {
+      busy = false; btn.disabled = false;
+    }
+  };
+  btn.addEventListener('click', submit);
+  form.addEventListener('submit', e => { e.preventDefault(); submit(); });
+  if (onOpen) onOpen(form, m);
+  const first = form.querySelector('input:not([type=hidden]):not([type=checkbox]), select, textarea');
+  if (first && window.innerWidth > 900) first.focus();
+  return m;
+}
+
+function errorText(err) {
+  if (!err) return 'Ralat tidak diketahui.';
+  if (err.name === 'ConstraintError') return 'Rekod yang sama sudah wujud (rekod pendua disekat).';
+  if (err.name === 'QuotaExceededError') return 'Ruang storan peranti penuh.';
+  return err.message || String(err);
+}
+
+// Jalankan tindakan async pada butang tanpa membenarkan klik berulang
+async function busyRun(btn, fn) {
+  if (btn && btn.dataset.busy === '1') return;
+  if (btn) { btn.dataset.busy = '1'; btn.disabled = true; }
+  try { return await fn(); }
+  catch (err) { console.error(err); toast(errorText(err), 'error'); }
+  finally { if (btn) { btn.dataset.busy = ''; btn.disabled = false; } }
+}
+
+/* ---------------- Jadual & paparan ---------------- */
+function tableHTML(headers, rows, empty) {
+  if (!rows.length) return empty || emptyState('search', 'Tiada rekod', 'Tiada rekod yang sepadan.');
+  return `<div class="table-wrap"><table class="table">
+    <thead><tr>${headers.map(h => {
+      const [t, cls] = Array.isArray(h) ? h : [h, ''];
+      return `<th class="${cls}">${U.esc(t)}</th>`;
+    }).join('')}</tr></thead>
+    <tbody>${rows.join('')}</tbody></table></div>`;
+}
+
+function emptyState(ic, title, text, actionHtml) {
+  return `<div class="empty">
+    <div class="empty-ico">${icon(ic)}</div>
+    <h4>${U.esc(title)}</h4>
+    ${text ? `<p>${U.esc(text)}</p>` : ''}
+    ${actionHtml || ''}
+  </div>`;
+}
+
+function badge(text, tone) { return `<span class="badge ${tone ? 'badge-' + tone : ''}">${U.esc(text)}</span>`; }
+
+function pageHead(title, sub, actions) {
+  return `<div class="page-head">
+    <div><h2>${U.esc(title)}</h2>${sub ? `<p>${U.esc(sub)}</p>` : ''}</div>
+    ${actions ? `<div class="actions no-print">${actions}</div>` : ''}
+  </div>`;
+}
+
+function statCard(iconName, label, value, note, tone) {
+  return `<div class="stat ${tone ? 'tone-' + tone : ''}">
+    <div class="stat-ico">${icon(iconName)}</div>
+    <div>
+      <div class="stat-label">${U.esc(label)}</div>
+      <div class="stat-value">${U.esc(value)}</div>
+      ${note ? `<div class="stat-note">${U.esc(note)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+/* ---------------- Platform asli (APK) ---------------- */
+const Native = {
+  isApp() {
+    return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &&
+      window.Capacitor.isNativePlatform());
+  },
+  call(method, opts) {
+    const C = window.Capacitor;
+    if (C && C.Plugins && C.Plugins.TSNative && typeof C.Plugins.TSNative[method] === 'function') {
+      return C.Plugins.TSNative[method](opts || {});
+    }
+    if (C && typeof C.nativePromise === 'function') return C.nativePromise('TSNative', method, opts || {});
+    return Promise.reject(new Error('Fungsi peranti tidak tersedia.'));
+  }
+};
+
+// Simpan fail teks: muat turun (pelayar) atau menu kongsi/simpan (APK)
+async function saveTextFile(filename, text, mime) {
+  if (Native.isApp()) {
+    await Native.call('shareFile', { filename, data: text, mimeType: mime || 'text/plain' });
+    return;
+  }
+  const blob = new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function toCSV(rows) {
+  const cell = v => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+}
+
+async function exportCSV(filename, rows) {
+  try {
+    await saveTextFile(filename, toCSV(rows), 'text/csv');
+    toast('Fail CSV disediakan.', 'success');
+  } catch (err) { toast(errorText(err), 'error'); }
+}
+
+const senCSV = sen => (Math.round(sen) / 100).toFixed(2);
+
+// Cetak dokumen khusus (resit, bil, laporan)
+async function printDoc(title, html) {
+  const area = document.getElementById('printArea');
+  const p = state.profile || {};
+  area.innerHTML = `<div class="print-doc">
+    <div class="print-head">
+      <div><strong>${U.esc(p.centreName || 'Tuisyen Smart')}</strong>
+      ${p.address ? `<div>${U.esc(p.address)}</div>` : ''}
+      ${p.phone ? `<div>Tel: ${U.esc(p.phone)}</div>` : ''}</div>
+      <div class="print-title">${U.esc(title)}</div>
+    </div>
+    ${html}
+    <div class="print-foot">Dijana oleh Tuisyen Smart pada ${U.formatDateTime(new Date().toISOString())}</div>
+  </div>`;
+  document.body.classList.add('print-mode');
+  await printPage(title);
+}
+
+async function printPage(title) {
+  try {
+    if (Native.isApp()) await Native.call('print', { name: title || 'Tuisyen Smart' });
+    else window.print();
+  } catch (err) {
+    toast(errorText(err), 'error');
+  }
+}
+
+window.addEventListener('afterprint', () => {
+  if (!Native.isApp()) document.body.classList.remove('print-mode');
+});
+
+/* ---------------- Tetapan ---------------- */
+const SETTING_DEFAULTS = {
+  profile: { centreName: '', phone: '', address: '', receiptNote: 'Terima kasih atas bayaran anda.' },
+  billing: { dueDays: 7, invoicePrefix: 'B', receiptPrefix: 'R' },
+  attendance: { lateCountsPresent: true, includeMakeup: true },
+  grades: {
+    allowOverFull: false,
+    list: [{ min: 80, g: 'A' }, { min: 65, g: 'B' }, { min: 50, g: 'C' }, { min: 40, g: 'D' }, { min: 0, g: 'E' }]
+  },
+  expenseCategories: { list: ['Sewa', 'Utiliti', 'Alat tulis', 'Bahan rujukan', 'Pengangkutan', 'Internet & telefon', 'Lain-lain'] },
+  backupInfo: { lastExportAt: null },
+  counters: {}
+};
+
+const Settings = {
+  async get(id) {
+    const rec = await DB.get('settings', id);
+    return Object.assign({ id }, JSON.parse(JSON.stringify(SETTING_DEFAULTS[id] || {})), rec || {});
+  },
+  async save(id, obj) {
+    const cur = await DB.get('settings', id);
+    return DB.put('settings', Object.assign({}, cur || {}, obj, { id }));
+  }
+};
+
+// Nombor berjujukan dalam transaksi (stor 'settings' mesti termasuk)
+async function nextNumber(st, key) {
+  const rec = (await DB.req(st.settings.get('counters'))) || { id: 'counters' };
+  const n = (Number(rec[key]) || 0) + 1;
+  rec[key] = n;
+  await DB.req(st.settings.put(DB.stamp(rec)));
+  return n;
+}
+
+/* ---------------- Kewangan (dikongsi semua modul) ---------------- */
+const Fin = {
+  // Muat semua data kewangan dan kira baki secara dinamik
+  async load() {
+    const [invoices, payments, allocations] = await Promise.all([
+      DB.getAll('invoices'), DB.getAll('payments'), DB.getAll('paymentAllocations')
+    ]);
+    const payMap = U.mapBy(payments);
+    const validAlloc = allocations.filter(a => { const p = payMap.get(a.paymentId); return p && p.status !== 'batal'; });
+    const paidByInvoice = new Map();
+    const allocByPayment = new Map();
+    validAlloc.forEach(a => {
+      paidByInvoice.set(a.invoiceId, (paidByInvoice.get(a.invoiceId) || 0) + a.amountSen);
+      allocByPayment.set(a.paymentId, (allocByPayment.get(a.paymentId) || 0) + a.amountSen);
+    });
+    const today = U.todayISO();
+    const f = {
+      invoices, payments, allocations, validAlloc, paidByInvoice, allocByPayment, today,
+      paid: inv => paidByInvoice.get(inv.id) || 0,
+      balance: inv => inv.status === 'batal' ? 0 : (inv.totalSen || 0) - (paidByInvoice.get(inv.id) || 0),
+      status: inv => Fin.status(inv, paidByInvoice.get(inv.id) || 0, today),
+      unallocated: p => p.status === 'batal' ? 0 : p.amountSen - (allocByPayment.get(p.id) || 0),
+      validInvoices: invoices.filter(i => i.status !== 'batal'),
+      validPayments: payments.filter(p => p.status !== 'batal')
+    };
+    f.creditOf = studentId => U.sum(f.validPayments.filter(p => p.studentId === studentId), p => f.unallocated(p));
+    f.outstandingOf = studentId => U.sum(f.validInvoices.filter(i => i.studentId === studentId), i => Math.max(0, f.balance(i)));
+    return f;
+  },
+  status(inv, paid, today) {
+    if (inv.status === 'batal') return 'batal';
+    const total = inv.totalSen || 0;
+    if (paid >= total) return 'selesai';
+    const overdue = inv.dueDate && inv.dueDate < (today || U.todayISO());
+    if (overdue) return 'tertunggak';
+    return paid > 0 ? 'separa' : 'belum bayar';
+  },
+  statusBadge(s) {
+    const map = { 'selesai': ['Selesai', 'success'], 'separa': ['Bayaran separa', 'warning'],
+      'belum bayar': ['Belum bayar', 'info'], 'tertunggak': ['Tertunggak', 'danger'], 'batal': ['Dibatalkan', ''] };
+    const [t, tone] = map[s] || [s, ''];
+    return badge(t, tone);
+  }
+};
+
+/* ---------------- Keadaan & penghala ---------------- */
+const state = { profile: null, renderToken: 0, params: [] };
+const VIEWS = {};
+
+const App = {
+  view(id, def) { VIEWS[id] = def; },
+  go(hash) { if (location.hash === hash) route(); else location.hash = hash; },
+  refresh() { return route(); }
+};
+
 function buildNav() {
-  const nav = document.getElementById('nav');
-  nav.innerHTML = MENU.map(m => `
-    <a href="#/${m.id}" class="nav-link" data-id="${m.id}">
-      ${icon(m.id)}<span>${U.esc(m.label)}</span>
-      ${m.phase > 1 ? `<small class="nav-phase" title="Akan dibina dalam Fasa ${m.phase}">F${m.phase}</small>` : ''}
-    </a>`).join('');
+  document.getElementById('nav').innerHTML = MENU.map(m => `
+    <a href="#/${m.id}" class="nav-link" data-id="${m.id}">${icon(m.id)}<span>${U.esc(m.label)}</span></a>`).join('');
 }
 
 function openSidebar() {
@@ -211,22 +581,20 @@ function openSidebar() {
   document.getElementById('overlay').hidden = false;
   document.getElementById('menuBtn').setAttribute('aria-expanded', 'true');
 }
-
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').hidden = true;
   document.getElementById('menuBtn').setAttribute('aria-expanded', 'false');
 }
 
-const VIEWS = {
-  dashboard: renderDashboard,
-  tetapan: renderSettings
-};
-
 async function route() {
-  const id = (location.hash || '').replace(/^#\/?/, '') || 'dashboard';
+  const raw = (location.hash || '').replace(/^#\/?/, '');
+  const parts = raw.split('/').filter(Boolean).map(decodeURIComponent);
+  const id = parts[0] || 'dashboard';
   const item = MENU.find(m => m.id === id);
-  if (!item) { location.hash = '#/dashboard'; return; }
+  const def = VIEWS[id];
+  if (!item || !def) { location.hash = '#/dashboard'; return; }
+  state.params = parts.slice(1);
 
   document.querySelectorAll('.nav-link').forEach(a => {
     const active = a.dataset.id === id;
@@ -235,135 +603,86 @@ async function route() {
   });
   document.getElementById('pageTitle').textContent = item.label;
   document.title = `${item.label} · Tuisyen Smart`;
+  document.body.classList.remove('print-mode');
   closeSidebar();
+  while (modalStack.length) modalStack[modalStack.length - 1].close();
 
   const view = document.getElementById('view');
   const token = ++state.renderToken;
-  view.innerHTML = '<div class="loading">Memuatkan…</div>';
+  if (!view.innerHTML.trim()) view.innerHTML = '<div class="loading">Memuatkan…</div>';
 
   try {
-    const html = await (VIEWS[id] ? VIEWS[id]() : renderPlaceholder(item));
-    if (token !== state.renderToken) return; // pengguna sudah beralih halaman
-    view.innerHTML = html;
-    if (VIEWS[id] && VIEWS[id].afterRender) VIEWS[id].afterRender(view);
-    view.focus({ preventScroll: true });
-    window.scrollTo(0, 0);
+    const html = await def.render(state.params);
+    if (token !== state.renderToken) return;
+    const y = view.dataset.route === raw ? window.scrollY : 0;
+    // Bekas baharu setiap kali supaya pendengar acara lama dibuang
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.innerHTML = html;
+    view.replaceChildren(page);
+    view.dataset.route = raw;
+    if (def.after) await def.after(page, state.params);
+    window.scrollTo(0, y);
   } catch (err) {
     console.error(err);
     if (token !== state.renderToken) return;
-    view.innerHTML = `
-      <div class="card"><div class="empty">
-        <div class="empty-ico">${icon('alert')}</div>
-        <h4>Halaman gagal dimuatkan</h4>
-        <p>${U.esc(err && err.message ? err.message : 'Ralat tidak diketahui.')}</p>
-        <button class="btn btn-primary" onclick="route()">Cuba lagi</button>
-      </div></div>`;
-    toast('Gagal memuatkan halaman.', 'error');
+    view.innerHTML = `<div class="card">${emptyState('alert', 'Halaman gagal dimuatkan', errorText(err),
+      '<button class="btn btn-primary" onclick="App.refresh()">Cuba lagi</button>')}</div>`;
   }
 }
 
-/* ---------------- Halaman modul belum dibina ---------------- */
-function renderPlaceholder(item) {
-  return `
-    <div class="page-head">
-      <div><h2>${U.esc(item.label)}</h2>
-      <p>Modul ini akan dibina dalam Fasa ${item.phase}.</p></div>
-    </div>
-    <div class="card"><div class="empty">
-      <div class="empty-ico">${icon(item.id)}</div>
-      <h4>Belum tersedia</h4>
-      <p>Struktur pangkalan data untuk modul ini sudah disediakan. Fungsi penuh akan ditambah dalam Fasa ${item.phase}.</p>
-      ${item.plan ? `<ul class="plan-list">${item.plan.map(p => `<li>${U.esc(p)}</li>`).join('')}</ul>` : ''}
-      <a class="btn btn-outline" href="#/dashboard">Kembali ke Dashboard</a>
-    </div></div>`;
-}
-
 /* ---------------- Dashboard ---------------- */
-function statCard(iconName, label, value, note, tone) {
-  return `
-    <div class="stat ${tone ? 'tone-' + tone : ''}">
-      <div class="stat-ico">${icon(iconName)}</div>
-      <div>
-        <div class="stat-label">${U.esc(label)}</div>
-        <div class="stat-value">${U.esc(value)}</div>
-        ${note ? `<div class="stat-note">${U.esc(note)}</div>` : ''}
-      </div>
-    </div>`;
-}
-
-// Kira semua angka dashboard daripada rekod sebenar
 async function computeDashboard() {
-  const [students, subjects, classes, invoices, payments, allocations, expenses] = await Promise.all([
-    DB.getAll('students'), DB.getAll('subjects'), DB.getAll('classes'),
-    DB.getAll('invoices'), DB.getAll('payments'), DB.getAll('paymentAllocations'),
-    DB.getAll('expenses')
+  const [students, subjects, classes, expenses, fin] = await Promise.all([
+    DB.getAll('students'), DB.getAll('subjects'), DB.getAll('classes'), DB.getAll('expenses'), Fin.load()
   ]);
-
   const today = U.todayISO();
   const monthKey = today.slice(0, 7);
   const inMonth = r => typeof r.date === 'string' && r.date.slice(0, 7) === monthKey;
-  const validInvoice = inv => inv.status !== 'batal';
+  const studentMap = U.mapBy(students);
+  const subjectMap = U.mapBy(subjects);
 
-  const studentMap = new Map(students.map(s => [s.id, s]));
-  const subjectMap = new Map(subjects.map(s => [s.id, s]));
-
-  // Jumlah diperuntukkan kepada setiap bil
-  const paidByInvoice = new Map();
-  allocations.forEach(a => {
-    paidByInvoice.set(a.invoiceId, (paidByInvoice.get(a.invoiceId) || 0) + (Number(a.amountSen) || 0));
-  });
-  const balanceOf = inv => (Number(inv.totalSen) || 0) - (paidByInvoice.get(inv.id) || 0);
-
-  const activeStudents = students.filter(s => s.status === 'aktif').length;
-  const classesToday = classes.filter(c => c.date === today && c.status !== 'dibatalkan');
-  const collectionMonth = U.sum(payments.filter(inMonth), p => p.amountSen);
-  const billedMonth = U.sum(invoices.filter(i => validInvoice(i) && inMonth(i)), i => i.totalSen);
-  const outstanding = U.sum(invoices.filter(validInvoice), i => Math.max(0, balanceOf(i)));
-  const expensesMonth = U.sum(expenses.filter(inMonth), e => e.amountSen);
-
-  // Bil tertunggak dan bil hampir tamat tempoh (7 hari)
   const soonLimit = U.addDaysISO(today, 7);
-  const dueBills = invoices
-    .filter(i => validInvoice(i) && balanceOf(i) > 0 && i.dueDate && i.dueDate <= soonLimit)
+  const dueBills = fin.validInvoices
+    .filter(i => fin.balance(i) > 0 && i.dueDate && i.dueDate <= soonLimit)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     .slice(0, 8)
-    .map(i => ({
-      inv: i,
-      balance: balanceOf(i),
-      studentName: (studentMap.get(i.studentId) || {}).name || '—',
-      daysLeft: U.daysBetween(today, i.dueDate)
-    }));
+    .map(i => ({ inv: i, balance: fin.balance(i), studentName: (studentMap.get(i.studentId) || {}).name || '—',
+      daysLeft: U.daysBetween(today, i.dueDate) }));
 
-  // Kelas akan datang (belum bermula)
   const nowMin = U.nowMinutes();
   const upcoming = classes
     .filter(c => (c.status === 'dijadualkan' || c.status === 'ganti') && c.date &&
       (c.date > today || (c.date === today && (U.minutesOf(c.startTime) ?? 0) >= nowMin)))
     .sort((a, b) => (a.date + (a.startTime || '')).localeCompare(b.date + (b.startTime || '')))
-    .slice(0, 8)
-    .map(c => ({
-      cls: c,
-      studentName: (studentMap.get(c.studentId) || {}).name || c.groupName || '—',
-      subjectName: (subjectMap.get(c.subjectId) || {}).name || c.subjectName || '—',
-      startsIn: c.date === today ? (U.minutesOf(c.startTime) - nowMin) : null
-    }));
+    .slice(0, 8);
 
   return {
-    totalStudents: students.length, activeStudents,
-    classesToday: classesToday.length,
-    collectionMonth, billedMonth, outstanding, expensesMonth,
-    dueBills, upcoming, monthKey
+    totalStudents: students.length,
+    activeStudents: students.filter(s => s.status === 'aktif').length,
+    classesToday: classes.filter(c => c.date === today && c.status !== 'dibatalkan').length,
+    collectionMonth: U.sum(fin.validPayments.filter(inMonth), p => p.amountSen),
+    billedMonth: U.sum(fin.validInvoices.filter(inMonth), i => i.totalSen),
+    outstanding: U.sum(fin.validInvoices, i => Math.max(0, fin.balance(i))),
+    expensesMonth: U.sum(expenses.filter(inMonth), e => e.amountSen),
+    dueBills, upcoming, studentMap, subjectMap, today, nowMin
   };
 }
 
-async function renderDashboard() {
-  const d = await computeDashboard();
-  const now = new Date();
-  const monthLabel = `${U.monthName(now.getMonth())} ${now.getFullYear()}`;
-  const centre = state.profile && state.profile.centreName ? state.profile.centreName : 'Tuisyen Smart';
+function classWho(c, studentMap) {
+  const names = (c.studentIds || []).map(id => (studentMap.get(id) || {}).name).filter(Boolean);
+  if (c.groupName) return c.groupName + (names.length ? ` (${names.length} pelajar)` : '');
+  return names.join(', ') || '—';
+}
 
-  const stats = `
-    <div class="stats">
+App.view('dashboard', {
+  async render() {
+    const d = await computeDashboard();
+    const now = new Date();
+    const monthLabel = `${U.monthName(now.getMonth())} ${now.getFullYear()}`;
+    const centre = state.profile && state.profile.centreName ? state.profile.centreName : 'Tuisyen Smart';
+
+    const stats = `<div class="stats">
       ${statCard('pelajar', 'Pelajar aktif', String(d.activeStudents), `Daripada ${d.totalStudents} pelajar berdaftar`)}
       ${statCard('jadual', 'Kelas hari ini', String(d.classesToday), 'Tidak termasuk kelas dibatalkan')}
       ${statCard('bayaran', 'Kutipan bulan ini', U.formatRM(d.collectionMonth), 'Wang sebenar diterima', 'success')}
@@ -372,298 +691,170 @@ async function renderDashboard() {
       ${statCard('perbelanjaan', 'Perbelanjaan bulan ini', U.formatRM(d.expensesMonth), monthLabel, 'warning')}
     </div>`;
 
-  const billsBody = d.dueBills.length ? `
-    <div class="table-wrap"><table class="table">
-      <thead><tr><th>No. Bil</th><th>Pelajar</th><th>Tarikh Akhir</th><th class="num">Baki</th><th>Status</th></tr></thead>
-      <tbody>${d.dueBills.map(b => {
-        const badge = b.daysLeft < 0
-          ? `<span class="badge badge-danger">Tertunggak ${Math.abs(b.daysLeft)} hari</span>`
-          : b.daysLeft === 0
-            ? '<span class="badge badge-warning">Tamat hari ini</span>'
-            : `<span class="badge badge-warning">${b.daysLeft} hari lagi</span>`;
-        return `<tr>
-          <td>${U.esc(b.inv.invoiceNo || b.inv.id)}</td>
-          <td>${U.esc(b.studentName)}</td>
-          <td>${U.formatDate(b.inv.dueDate)}</td>
-          <td class="num">${U.formatRM(b.balance)}</td>
-          <td>${badge}</td></tr>`;
-      }).join('')}</tbody></table></div>` : `
-    <div class="empty">
-      <div class="empty-ico">${icon('yuran')}</div>
-      <h4>Tiada bil perlu diberi perhatian</h4>
-      <p>Bil yang tertunggak atau tamat tempoh dalam 7 hari akan dipaparkan di sini. Modul bil akan dibina dalam Fasa 5.</p>
-    </div>`;
+    const bills = d.dueBills.length ? tableHTML(['No. Bil', 'Pelajar', 'Tarikh Akhir', ['Baki', 'num'], 'Status'],
+      d.dueBills.map(b => {
+        const st = b.daysLeft < 0 ? badge(`Tertunggak ${Math.abs(b.daysLeft)} hari`, 'danger')
+          : b.daysLeft === 0 ? badge('Tamat hari ini', 'warning') : badge(`${b.daysLeft} hari lagi`, 'warning');
+        return `<tr class="click-row" data-href="#/yuran/${encodeURIComponent(b.inv.id)}">
+          <td>${U.esc(b.inv.invoiceNo)}</td><td>${U.esc(b.studentName)}</td>
+          <td>${U.formatDate(b.inv.dueDate)}</td><td class="num">${U.formatRM(b.balance)}</td><td>${st}</td></tr>`;
+      })) : emptyState('yuran', 'Tiada bil perlu diberi perhatian', 'Bil yang tertunggak atau tamat tempoh dalam 7 hari akan dipaparkan di sini.');
 
-  const classesBody = d.upcoming.length ? `
-    <div class="table-wrap"><table class="table">
-      <thead><tr><th>Tarikh</th><th>Masa</th><th>Pelajar / Kumpulan</th><th>Subjek</th><th>Status</th></tr></thead>
-      <tbody>${d.upcoming.map(u => {
-        let badge = u.cls.status === 'ganti'
-          ? '<span class="badge badge-info">Kelas ganti</span>'
-          : '<span class="badge">Dijadualkan</span>';
-        if (u.startsIn !== null && u.startsIn >= 0 && u.startsIn <= 60) {
-          badge = `<span class="badge badge-warning">Bermula dalam ${u.startsIn} minit</span>`;
-        }
-        return `<tr>
-          <td>${U.formatDate(u.cls.date)}</td>
-          <td>${U.esc(u.cls.startTime || '—')}${u.cls.endTime ? '–' + U.esc(u.cls.endTime) : ''}</td>
-          <td>${U.esc(u.studentName)}</td>
-          <td>${U.esc(u.subjectName)}</td>
-          <td>${badge}</td></tr>`;
-      }).join('')}</tbody></table></div>` : `
-    <div class="empty">
-      <div class="empty-ico">${icon('jadual')}</div>
-      <h4>Tiada kelas akan datang</h4>
-      <p>Kelas yang dijadualkan akan dipaparkan di sini. Modul jadual kelas akan dibina dalam Fasa 4.</p>
-    </div>`;
+    const classes = d.upcoming.length ? tableHTML(['Tarikh', 'Masa', 'Pelajar / Kumpulan', 'Subjek', 'Status'],
+      d.upcoming.map(c => {
+        let st = c.status === 'ganti' ? badge('Kelas ganti', 'info') : badge('Dijadualkan');
+        const startsIn = c.date === d.today ? U.minutesOf(c.startTime) - d.nowMin : null;
+        if (startsIn !== null && startsIn >= 0 && startsIn <= 60) st = badge(`Bermula dalam ${startsIn} minit`, 'warning');
+        return `<tr class="click-row" data-href="#/jadual/hari/${c.date}">
+          <td>${U.formatDate(c.date)}</td><td>${U.esc(c.startTime || '—')}–${U.esc(c.endTime || '')}</td>
+          <td>${U.esc(classWho(c, d.studentMap))}</td><td>${U.esc((d.subjectMap.get(c.subjectId) || {}).name || '—')}</td>
+          <td>${st}</td></tr>`;
+      })) : emptyState('jadual', 'Tiada kelas akan datang', 'Tambah kelas di menu Jadual Kelas.',
+      '<a class="btn btn-outline" href="#/jadual">Buka Jadual Kelas</a>');
 
-  const firstSteps = d.totalStudents === 0 ? `
-    <div class="card"><div class="empty">
-      <div class="empty-ico">${icon('pelajar')}</div>
-      <h4>Selamat datang ke Tuisyen Smart</h4>
-      <p>Belum ada pelajar didaftarkan. Langkah pertama: lengkapkan maklumat pusat tuisyen di Tetapan. Pendaftaran pelajar akan tersedia dalam Fasa 2.</p>
-      <a class="btn btn-primary" href="#/tetapan">${icon('tetapan')} Buka Tetapan</a>
-    </div></div>` : '';
+    const firstSteps = d.totalStudents === 0 ? `<div class="card">${emptyState('pelajar', 'Selamat datang ke Tuisyen Smart',
+      'Mulakan dengan: 1) isi maklumat pusat di Tetapan, 2) daftar subjek, 3) daftar pelajar.',
+      `<div class="actions center"><a class="btn btn-outline" href="#/tetapan">Tetapan</a>
+       <a class="btn btn-outline" href="#/subjek">Daftar subjek</a>
+       <a class="btn btn-primary" href="#/pelajar">${icon('plus')} Daftar pelajar</a></div>`)}</div>` : '';
 
-  return `
-    <div class="page-head">
-      <div>
-        <h2>${U.esc(centre)}</h2>
-        <p>Ringkasan ${U.esc(monthLabel)} · dikira daripada rekod sebenar</p>
-      </div>
-      <div class="actions no-print">
-        <button class="btn btn-outline" data-act="refresh">${icon('refresh')} Muat semula</button>
-        <button class="btn btn-outline" data-act="print">${icon('print')} Cetak</button>
-      </div>
-    </div>
-    ${stats}
-    <div class="stack">
-      ${firstSteps}
-      <div class="grid-2">
-        <section class="card">
-          <div class="card-head"><h3>${icon('alert')} Peringatan bil</h3>
-            <span class="card-note">Tertunggak & 7 hari akan datang</span></div>
-          ${billsBody}
-        </section>
-        <section class="card">
-          <div class="card-head"><h3>${icon('clock')} Kelas akan datang</h3>
-            <span class="card-note">8 kelas terdekat</span></div>
-          ${classesBody}
-        </section>
-      </div>
-    </div>`;
-}
-
-renderDashboard.afterRender = view => {
-  view.querySelector('[data-act="refresh"]').addEventListener('click', async () => {
-    await route();
-    toast('Dashboard dikemas kini.', 'success');
-  });
-  view.querySelector('[data-act="print"]').addEventListener('click', () => window.print());
-};
-
-/* ---------------- Tetapan (asas) ---------------- */
-async function loadProfile() {
-  state.profile = await DB.get('settings', 'profile');
-  const sub = document.getElementById('brandSub');
-  sub.textContent = state.profile && state.profile.centreName ? state.profile.centreName : 'Pengurusan Tuisyen';
-}
-
-async function renderSettings() {
-  const p = state.profile || {};
-  const demoExists = !!(await DB.get('students', 'DEMO-P001'));
-  const counts = await Promise.all(DB.STORE_NAMES.map(n => DB.count(n)));
-  const totalRecords = counts.reduce((a, b) => a + b, 0);
-
-  return `
-    <div class="page-head">
-      <div><h2>Tetapan</h2><p>Maklumat asas pusat tuisyen dan alat ujian Fasa 1.</p></div>
-    </div>
-    <div class="stack">
-      <section class="card">
-        <div class="card-head"><h3>${icon('tetapan')} Maklumat pusat tuisyen</h3></div>
-        <div class="card-body">
-          <form id="profileForm" novalidate>
-            <div class="form-grid">
-              <div class="field">
-                <label for="centreName">Nama pusat / tutor <span class="req">*</span></label>
-                <input id="centreName" name="centreName" maxlength="80" value="${U.esc(p.centreName || '')}" placeholder="cth. Tuisyen Cikgu Hanif">
-                <div class="field-error" id="centreNameErr"></div>
-              </div>
-              <div class="field">
-                <label for="phone">No. telefon</label>
-                <input id="phone" name="phone" inputmode="tel" maxlength="20" value="${U.esc(p.phone || '')}" placeholder="cth. 012-3456789">
-                <div class="field-error" id="phoneErr"></div>
-              </div>
-              <div class="field">
-                <label for="address">Alamat (untuk resit)</label>
-                <input id="address" name="address" maxlength="160" value="${U.esc(p.address || '')}" placeholder="Pilihan">
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="reset" class="btn btn-outline">Batal</button>
-              <button type="submit" class="btn btn-primary" id="saveProfileBtn">${icon('save')} Simpan</button>
-            </div>
-          </form>
+    return `${pageHead(centre, `Ringkasan ${monthLabel} · dikira daripada rekod sebenar`,
+      `<button class="btn btn-outline" data-act="refresh">${icon('refresh')} Muat semula</button>
+       <button class="btn btn-outline" data-act="print">${icon('print')} Cetak</button>`)}
+      ${stats}
+      <div class="stack">
+        ${firstSteps}
+        <div class="grid-2">
+          <section class="card"><div class="card-head"><h3>${icon('alert')} Peringatan bil</h3>
+            <span class="card-note">Tertunggak & 7 hari akan datang</span></div>${bills}</section>
+          <section class="card"><div class="card-head"><h3>${icon('clock')} Kelas akan datang</h3>
+            <span class="card-note">8 kelas terdekat</span></div>${classes}</section>
         </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h3>${icon('sandaran')} Status sistem</h3></div>
-        <div class="card-body">
-          <dl class="kv">
-            <dt>Versi aplikasi</dt><dd>${U.esc(APP_VERSION)}</dd>
-            <dt>Pangkalan data</dt><dd>${U.esc(DB.DB_NAME)} (v${DB.DB_VERSION}) · ${DB.STORE_NAMES.length} stor</dd>
-            <dt>Jumlah rekod</dt><dd>${totalRecords}</dd>
-            <dt>Mod operasi</dt><dd>${isNativeApp() ? 'Aplikasi Android (APK) – fail dibungkus dalam aplikasi' : location.protocol === 'file:' ? 'Fail terus (file://) – PWA tidak aktif' : ('serviceWorker' in navigator ? 'Pelayan web – sokongan offline aktif' : 'Pelayan web – pelayar tidak menyokong Service Worker')}</dd>
-            <dt>Storan kekal</dt><dd id="persistInfo">Menyemak…</dd>
-          </dl>
-        </div>
-      </section>
-
-      <section class="card no-print">
-        <div class="card-head"><h3>${icon('flask')} Alat ujian Fasa 1</h3></div>
-        <div class="card-body">
-          <p class="small muted" style="margin-top:0">Masukkan data contoh untuk menguji pengiraan dashboard. Data contoh ditanda khas dan boleh dipadam tanpa menjejaskan data sebenar.</p>
-          <div class="actions">
-            <button class="btn btn-outline" id="demoAddBtn" ${demoExists ? 'disabled' : ''}>${icon('flask')} Masukkan data contoh</button>
-            <button class="btn btn-danger" id="demoDelBtn" ${demoExists ? '' : 'disabled'}>${icon('trash')} Padam data contoh</button>
-          </div>
-        </div>
-      </section>
-    </div>`;
-}
-
-renderSettings.afterRender = view => {
-  const form = view.querySelector('#profileForm');
-  const saveBtn = view.querySelector('#saveProfileBtn');
-
-  form.addEventListener('reset', () => {
-    setTimeout(() => {
-      view.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
-      view.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; });
+      </div>`;
+  },
+  after(view) {
+    view.querySelector('[data-act="refresh"]').addEventListener('click', async () => {
+      await App.refresh(); toast('Dashboard dikemas kini.', 'success');
     });
-  });
-
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    if (saveBtn.disabled) return; // elak klik berulang
-    const name = form.centreName.value.trim();
-    const phone = form.phone.value.trim();
-    let ok = true;
-
-    const setErr = (id, msg) => {
-      view.querySelector('#' + id + 'Err').textContent = msg;
-      view.querySelector('#' + id).closest('.field').classList.toggle('invalid', !!msg);
-      if (msg) ok = false;
-    };
-    setErr('centreName', name ? '' : 'Nama pusat / tutor diperlukan.');
-    setErr('phone', !phone || /^[0-9+\-\s]{7,20}$/.test(phone) ? '' : 'Format telefon tidak sah.');
-    if (!ok) { toast('Sila semak borang.', 'error'); return; }
-
-    saveBtn.disabled = true;
-    try {
-      const rec = Object.assign({}, state.profile || {}, {
-        id: 'profile', centreName: name, phone, address: form.address.value.trim()
-      });
-      await DB.put('settings', rec);
-      await loadProfile();
-      toast('Tetapan berjaya disimpan.', 'success');
-    } catch (err) {
-      console.error(err);
-      toast('Gagal menyimpan tetapan.', 'error');
-    } finally {
-      saveBtn.disabled = false;
-    }
-  });
-
-  view.querySelector('#demoAddBtn').addEventListener('click', async ev => {
-    ev.currentTarget.disabled = true;
-    try {
-      await insertDemoData();
-      toast('Data contoh dimasukkan. Semak Dashboard.', 'success');
-    } catch (err) {
-      console.error(err);
-      toast(err.message || 'Gagal memasukkan data contoh.', 'error');
-    }
-    route();
-  });
-
-  view.querySelector('#demoDelBtn').addEventListener('click', async ev => {
-    const ok = await confirmDialog({
-      title: 'Padam data contoh?',
-      message: 'Semua rekod bertanda data contoh akan dipadam. Data sebenar tidak terjejas.',
-      confirmText: 'Padam', danger: true
-    });
-    if (!ok) return;
-    try {
-      const n = await deleteDemoData();
-      toast(`${n} rekod contoh dipadam.`, 'success');
-    } catch (err) {
-      console.error(err);
-      toast('Gagal memadam data contoh.', 'error');
-    }
-    route();
-  });
-
-  const info = view.querySelector('#persistInfo');
-  if (navigator.storage && navigator.storage.persisted) {
-    navigator.storage.persisted().then(p => {
-      info.textContent = p ? 'Ya – pelayar tidak akan memadam data secara automatik'
-                           : 'Tidak dijamin – buat sandaran berkala (Fasa 8)';
-    }).catch(() => { info.textContent = 'Tidak dapat disemak'; });
-  } else {
-    info.textContent = 'Tidak disokong oleh pelayar ini';
+    view.querySelector('[data-act="print"]').addEventListener('click', () => printPage('Dashboard'));
   }
-};
+});
 
-/* ---------------- Data contoh (ujian dashboard) ---------------- */
-async function insertDemoData() {
-  if (await DB.get('students', 'DEMO-P001')) throw new Error('Data contoh sudah wujud.');
-  const today = U.todayISO();
-  const tomorrow = U.addDaysISO(today, 1);
-  const demo = { _demo: true };
-  const S = r => DB.stamp(Object.assign({}, r, demo));
-
-  // Satu transaksi: semua masuk atau tiada yang masuk
-  await DB.transaction(
-    ['students', 'subjects', 'classes', 'invoices', 'payments', 'paymentAllocations', 'expenses'],
-    'readwrite',
-    st => {
-      st.subjects.add(S({ id: 'DEMO-SUB1', name: 'Matematik (contoh)' }));
-      st.subjects.add(S({ id: 'DEMO-SUB2', name: 'Sains (contoh)' }));
-      st.students.add(S({ id: 'DEMO-P001', name: 'Aisyah (contoh)', status: 'aktif', school: 'SK Contoh', level: 'Tahun 5' }));
-      st.students.add(S({ id: 'DEMO-P002', name: 'Danish (contoh)', status: 'aktif', school: 'SMK Contoh', level: 'Tingkatan 2' }));
-      st.students.add(S({ id: 'DEMO-P003', name: 'Irfan (contoh)', status: 'tidak aktif', school: 'SMK Contoh', level: 'Tingkatan 3' }));
-
-      st.classes.add(S({ id: 'DEMO-C1', date: today, startTime: '23:00', endTime: '23:59', studentId: 'DEMO-P001', subjectId: 'DEMO-SUB1', status: 'dijadualkan' }));
-      st.classes.add(S({ id: 'DEMO-C2', date: today, startTime: '08:00', endTime: '09:00', studentId: 'DEMO-P002', subjectId: 'DEMO-SUB2', status: 'dibatalkan' }));
-      st.classes.add(S({ id: 'DEMO-C3', date: tomorrow, startTime: '15:00', endTime: '16:30', studentId: 'DEMO-P002', subjectId: 'DEMO-SUB1', status: 'dijadualkan' }));
-
-      st.invoices.add(S({ id: 'DEMO-INV1', invoiceNo: 'DEMO-B0001', studentId: 'DEMO-P001', date: today, dueDate: U.addDaysISO(today, 3), totalSen: 8000, status: 'separa' }));
-      st.invoices.add(S({ id: 'DEMO-INV2', invoiceNo: 'DEMO-B0002', studentId: 'DEMO-P002', date: today, dueDate: U.addDaysISO(today, -2), totalSen: 18000, status: 'tertunggak' }));
-
-      st.payments.add(S({ id: 'DEMO-PAY1', receiptNo: 'DEMO-R0001', studentId: 'DEMO-P001', date: today, amountSen: 5000, method: 'tunai' }));
-      st.paymentAllocations.add(S({ id: 'DEMO-AL1', paymentId: 'DEMO-PAY1', invoiceId: 'DEMO-INV1', amountSen: 5000 }));
-
-      st.expenses.add(S({ id: 'DEMO-EXP1', date: today, category: 'Alat tulis', description: 'Kertas latihan (contoh)', amountSen: 3550, method: 'tunai' }));
-    }
-  );
+/* ---------------- Tetapan ---------------- */
+async function loadProfile() {
+  state.profile = await Settings.get('profile');
+  document.getElementById('brandSub').textContent = state.profile.centreName || 'Pengurusan Tuisyen';
 }
 
-async function deleteDemoData() {
-  const names = ['students', 'subjects', 'classes', 'invoices', 'payments', 'paymentAllocations', 'expenses'];
-  const all = await Promise.all(names.map(n => DB.getAll(n)));
-  let n = 0;
-  await DB.transaction(names, 'readwrite', st => {
-    names.forEach((name, i) => {
-      all[i].filter(r => r._demo === true).forEach(r => { st[name].delete(r.id); n++; });
+App.view('tetapan', {
+  async render() {
+    const [p, b, a, g] = await Promise.all([Settings.get('profile'), Settings.get('billing'),
+      Settings.get('attendance'), Settings.get('grades')]);
+    const counts = await Promise.all(DB.STORE_NAMES.map(n => DB.count(n)));
+    const totalRecords = counts.reduce((x, y) => x + y, 0);
+    const gradeRows = g.list.map((r, i) => `<div class="grade-row">
+        <input name="g_min_${i}" type="number" min="0" max="100" value="${r.min}" aria-label="Peratus minimum">
+        <span>% ke atas =</span>
+        <input name="g_g_${i}" maxlength="4" value="${U.esc(r.g)}" aria-label="Gred"></div>`).join('');
+
+    return `${pageHead('Tetapan', 'Maklumat pusat, bil, kehadiran dan gred.')}
+    <div class="stack">
+      <section class="card"><div class="card-head"><h3>${icon('tetapan')} Maklumat pusat tuisyen</h3></div>
+        <div class="card-body"><form id="profileForm" novalidate>
+          <div class="form-grid">
+            ${F.text('centreName', 'Nama pusat / tutor', p.centreName, { req: true, max: 80, placeholder: 'cth. Tuisyen Cikgu Hanif' })}
+            ${F.text('phone', 'No. telefon', p.phone, { max: 20, attrs: 'inputmode="tel"' })}
+            ${F.text('address', 'Alamat (untuk resit)', p.address, { max: 160 })}
+            ${F.text('receiptNote', 'Nota kaki resit', p.receiptNote, { max: 160 })}
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">${icon('save')} Simpan</button></div>
+        </form></div></section>
+
+      <section class="card"><div class="card-head"><h3>${icon('yuran')} Bil dan resit</h3></div>
+        <div class="card-body"><form id="billingForm" novalidate>
+          <div class="form-grid">
+            ${F.number('dueDays', 'Tempoh bayar (hari selepas tarikh bil)', b.dueDays, { req: true })}
+            ${F.text('invoicePrefix', 'Awalan no. bil', b.invoicePrefix, { max: 5, help: 'cth. B → B2026-0001' })}
+            ${F.text('receiptPrefix', 'Awalan no. resit', b.receiptPrefix, { max: 5, help: 'cth. R → R2026-0001' })}
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">${icon('save')} Simpan</button></div>
+        </form></div></section>
+
+      <section class="card"><div class="card-head"><h3>${icon('kehadiran')} Polisi kehadiran</h3></div>
+        <div class="card-body"><form id="attForm" novalidate>
+          <p class="small muted mt0">Peratus kehadiran = kelas dihadiri ÷ kelas layak dikira × 100. Kelas yang dibatalkan dan cuti/dikecualikan tidak dikira dalam penyebut.</p>
+          <label class="check"><input type="checkbox" name="lateCountsPresent" ${a.lateCountsPresent ? 'checked' : ''}> Lewat dikira sebagai hadir</label>
+          <label class="check"><input type="checkbox" name="includeMakeup" ${a.includeMakeup ? 'checked' : ''}> Kelas ganti dikira dalam peratus kehadiran</label>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">${icon('save')} Simpan</button></div>
+        </form></div></section>
+
+      <section class="card"><div class="card-head"><h3>${icon('prestasi')} Skala gred</h3></div>
+        <div class="card-body"><form id="gradeForm" novalidate>
+          <p class="small muted mt0">Gred diisi automatik berdasarkan peratus jika tidak dimasukkan secara manual.</p>
+          <div class="grade-list">${gradeRows}</div>
+          <label class="check"><input type="checkbox" name="allowOverFull" ${g.allowOverFull ? 'checked' : ''}> Benarkan markah melebihi markah penuh (markah bonus)</label>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">${icon('save')} Simpan</button></div>
+        </form></div></section>
+
+      <section class="card"><div class="card-head"><h3>${icon('sandaran')} Status sistem</h3></div>
+        <div class="card-body"><dl class="kv">
+          <dt>Versi aplikasi</dt><dd>${U.esc(APP_VERSION)}</dd>
+          <dt>Pangkalan data</dt><dd>${U.esc(DB.DB_NAME)} (v${DB.DB_VERSION}) · ${DB.STORE_NAMES.length} stor</dd>
+          <dt>Jumlah rekod</dt><dd>${totalRecords}</dd>
+          <dt>Mod operasi</dt><dd>${Native.isApp() ? 'Aplikasi Android (APK)' : location.protocol === 'file:' ? 'Fail terus (file://)' : 'Pelayar web'}</dd>
+          <dt>Storan kekal</dt><dd id="persistInfo">Menyemak…</dd>
+        </dl></div></section>
+    </div>`;
+  },
+  after(view) {
+    const bind = (id, fn) => {
+      const form = view.querySelector('#' + id);
+      const btn = form.querySelector('[type=submit]');
+      form.addEventListener('submit', e => { e.preventDefault(); busyRun(btn, () => fn(form, formData(form))); });
+    };
+    bind('profileForm', async (form, d) => {
+      if (!showErrors(form, {
+        centreName: d.centreName ? '' : 'Nama pusat / tutor diperlukan.',
+        phone: !d.phone || /^[0-9+\-\s]{7,20}$/.test(d.phone) ? '' : 'Format telefon tidak sah.'
+      })) return;
+      await Settings.save('profile', d);
+      await loadProfile();
+      toast('Maklumat pusat disimpan.', 'success');
     });
-  });
-  return n;
-}
+    bind('billingForm', async (form, d) => {
+      const days = parseInt(d.dueDays, 10);
+      if (!showErrors(form, { dueDays: days >= 0 && days <= 365 ? '' : 'Masukkan 0 hingga 365 hari.' })) return;
+      await Settings.save('billing', { dueDays: days, invoicePrefix: d.invoicePrefix || 'B', receiptPrefix: d.receiptPrefix || 'R' });
+      toast('Tetapan bil disimpan.', 'success');
+    });
+    bind('attForm', async (form, d) => {
+      await Settings.save('attendance', { lateCountsPresent: !!d.lateCountsPresent, includeMakeup: !!d.includeMakeup });
+      toast('Polisi kehadiran disimpan.', 'success');
+    });
+    bind('gradeForm', async (form, d) => {
+      const list = [];
+      for (let i = 0; d['g_min_' + i] !== undefined; i++) {
+        const min = Number(d['g_min_' + i]);
+        const g = d['g_g_' + i];
+        if (!g) continue;
+        if (!(min >= 0 && min <= 100)) { toast('Peratus minimum mesti 0 hingga 100.', 'error'); return; }
+        list.push({ min, g });
+      }
+      list.sort((x, y) => y.min - x.min);
+      await Settings.save('grades', { list, allowOverFull: !!d.allowOverFull });
+      toast('Skala gred disimpan.', 'success');
+      App.refresh();
+    });
+    const info = view.querySelector('#persistInfo');
+    if (navigator.storage && navigator.storage.persisted) {
+      navigator.storage.persisted().then(p => {
+        info.textContent = p || Native.isApp() ? 'Ya – data kekal dalam peranti' : 'Tidak dijamin – buat sandaran berkala';
+      }).catch(() => { info.textContent = 'Tidak dapat disemak'; });
+    } else info.textContent = Native.isApp() ? 'Ya – data kekal dalam aplikasi' : 'Tidak disokong';
+  }
+});
 
-/* ---------------- Status rangkaian & tarikh ---------------- */
+/* ---------------- Status rangkaian, tarikh, banner ---------------- */
 function updateNetBadge() {
   const b = document.getElementById('netBadge');
   const on = navigator.onLine;
@@ -671,53 +862,51 @@ function updateNetBadge() {
   b.classList.toggle('offline', !on);
   b.title = 'Aplikasi berfungsi tanpa internet. Status ini hanya makluman.';
 }
-
 function updateToday() {
   const d = new Date();
   document.getElementById('todayLabel').textContent = `${U.dayName(d)}, ${U.formatDate(U.toISODate(d))}`;
 }
 
-/* ---------------- Banner mod fail terus ---------------- */
 function showFileBanner() {
   if (location.protocol !== 'file:') return;
   let dismissed = false;
   try { dismissed = localStorage.getItem('ts_hideFileBanner') === '1'; } catch (e) { /* abaikan */ }
   if (dismissed) return;
   const el = document.getElementById('banner');
-  el.innerHTML = `
-    <div class="banner">
-      ${icon('alert')}
-      <div class="grow">Anda membuka fail secara terus (file://). Fungsi PWA (pasang & offline cache) tidak aktif, dan sesetengah pelayar mungkin tidak menyimpan data secara konsisten. Gunakan pelayan tempatan – lihat README.md.</div>
-      <button class="btn btn-sm btn-outline" id="hideBanner">Faham</button>
-    </div>`;
+  el.innerHTML = `<div class="banner">${icon('alert')}
+    <div class="grow">Anda membuka fail secara terus (file://). PWA tidak aktif dan sesetengah pelayar tidak menyimpan data secara konsisten. Gunakan APK atau pelayan tempatan.</div>
+    <button class="btn btn-sm btn-outline" id="hideBanner">Faham</button></div>`;
   el.querySelector('#hideBanner').addEventListener('click', () => {
     try { localStorage.setItem('ts_hideFileBanner', '1'); } catch (e) { /* abaikan */ }
     el.innerHTML = '';
   });
 }
 
-/* ---------------- Service Worker ---------------- */
-function isNativeApp() {
-  return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' &&
-    window.Capacitor.isNativePlatform());
+function registerServiceWorker() {
+  if (Native.isApp() || !('serviceWorker' in navigator)) return;
+  const secure = location.protocol === 'https:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+  if (!secure) return;
+  navigator.serviceWorker.register('service-worker.js').catch(err => console.warn('Service Worker gagal:', err));
 }
 
-function registerServiceWorker() {
-  if (isNativeApp()) return; // Dalam APK, semua fail sudah ada dalam aplikasi
-  if (!('serviceWorker' in navigator)) return;
-  const secure = location.protocol === 'https:' ||
-    ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-  if (!secure) return;
-  navigator.serviceWorker.register('service-worker.js').catch(err => {
-    console.warn('Service Worker gagal didaftarkan:', err);
-  });
+// Amaran kelas yang akan bermula dalam 30 minit (sekali bagi setiap kelas)
+const notifiedClasses = new Set();
+async function checkUpcomingClasses() {
+  try {
+    const today = U.todayISO();
+    const list = await DB.getAllByIndex('classes', 'date', today);
+    const now = U.nowMinutes();
+    const soon = list.filter(c => (c.status === 'dijadualkan' || c.status === 'ganti') &&
+      !notifiedClasses.has(c.id) && U.minutesOf(c.startTime) - now >= 0 && U.minutesOf(c.startTime) - now <= 30);
+    soon.forEach(c => notifiedClasses.add(c.id));
+    soon.forEach(c => toast(`Kelas bermula pada ${c.startTime} (${U.minutesOf(c.startTime) - now} minit lagi).`, 'warning'));
+  } catch (e) { /* abaikan */ }
 }
 
 /* ---------------- Permulaan ---------------- */
 async function init() {
   document.getElementById('appVersion').textContent = `Versi ${APP_VERSION}`;
-  updateToday();
-  updateNetBadge();
+  updateToday(); updateNetBadge();
   setInterval(updateToday, 60000);
   window.addEventListener('online', updateNetBadge);
   window.addEventListener('offline', updateNetBadge);
@@ -725,44 +914,38 @@ async function init() {
   document.getElementById('menuBtn').addEventListener('click', openSidebar);
   document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
   document.getElementById('overlay').addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalStack.length) closeSidebar(); });
+  document.getElementById('view').addEventListener('click', e => {
+    const row = e.target.closest('[data-href]');
+    if (row && !e.target.closest('button, a, input, select, label')) location.hash = row.dataset.href;
+  });
 
   buildNav();
   showFileBanner();
 
+  const view = document.getElementById('view');
   if (!DB.isSupported()) {
-    document.getElementById('view').innerHTML = `
-      <div class="card"><div class="empty">
-        <div class="empty-ico">${icon('alert')}</div>
-        <h4>Pelayar tidak disokong</h4>
-        <p>Pelayar ini tidak menyokong IndexedDB. Sila gunakan Google Chrome, Microsoft Edge atau Firefox versi terkini.</p>
-      </div></div>`;
+    view.innerHTML = `<div class="card">${emptyState('alert', 'Pelayar tidak disokong',
+      'Pelayar ini tidak menyokong IndexedDB. Gunakan Google Chrome, Microsoft Edge atau Firefox terkini.')}</div>`;
     return;
   }
-
   try {
     await DB.open();
     await loadProfile();
   } catch (err) {
     console.error(err);
-    document.getElementById('view').innerHTML = `
-      <div class="card"><div class="empty">
-        <div class="empty-ico">${icon('alert')}</div>
-        <h4>Pangkalan data gagal dibuka</h4>
-        <p>${U.esc(err.message || 'Ralat tidak diketahui.')} Pastikan anda tidak menggunakan mod inkognito / peribadi.</p>
-      </div></div>`;
+    view.innerHTML = `<div class="card">${emptyState('alert', 'Pangkalan data gagal dibuka',
+      errorText(err) + ' Pastikan anda tidak menggunakan mod inkognito.')}</div>`;
     return;
   }
-
-  // Minta pelayar simpan data secara kekal (jika disokong)
-  if (navigator.storage && navigator.storage.persist) {
-    navigator.storage.persist().catch(() => {});
-  }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
   window.addEventListener('hashchange', route);
   if (!location.hash) history.replaceState(null, '', '#/dashboard');
-  route();
+  await route();
   registerServiceWorker();
+  checkUpcomingClasses();
+  setInterval(checkUpcomingClasses, 5 * 60000);
 }
 
 document.addEventListener('DOMContentLoaded', init);

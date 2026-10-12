@@ -38,6 +38,11 @@ jobs:
           rm -rf $RES/mipmap-anydpi-v26
           cp -r android-res/mipmap-* $RES/
 
+      - name: Pasang plugin asli (cetak & simpan fail)
+        run: |
+          JAVA_DIR=android/app/src/main/java/com/blackburn/tuisyensmart
+          cp android-res/java/*.java $JAVA_DIR/
+
       - name: Salin fail aplikasi ke Android
         run: npx cap sync android
 

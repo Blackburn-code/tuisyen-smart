@@ -6,7 +6,8 @@
    ========================================================= */
 'use strict';
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.0.1';
+const APP_COPYRIGHT = `© ${new Date().getFullYear()} Abu Hanifah bin Rozali. Hak cipta terpelihara.`;
 
 /* ---------------- Ikon (SVG tempatan) ---------------- */
 const ICONS = {
@@ -463,7 +464,7 @@ async function printDoc(title, html) {
       <div class="print-title">${U.esc(title)}</div>
     </div>
     ${html}
-    <div class="print-foot">Dijana oleh Tuisyen Smart pada ${U.formatDateTime(new Date().toISOString())}</div>
+    <div class="print-foot">Dijana oleh Tuisyen Smart pada ${U.formatDateTime(new Date().toISOString())} · ${U.esc(APP_COPYRIGHT)}</div>
   </div>`;
   document.body.classList.add('print-mode');
   await printPage(title);
@@ -799,6 +800,7 @@ App.view('tetapan', {
       <section class="card"><div class="card-head"><h3>${icon('sandaran')} Status sistem</h3></div>
         <div class="card-body"><dl class="kv">
           <dt>Versi aplikasi</dt><dd>${U.esc(APP_VERSION)}</dd>
+          <dt>Hak cipta</dt><dd>${U.esc(APP_COPYRIGHT)}</dd>
           <dt>Pangkalan data</dt><dd>${U.esc(DB.DB_NAME)} (v${DB.DB_VERSION}) · ${DB.STORE_NAMES.length} stor</dd>
           <dt>Jumlah rekod</dt><dd>${totalRecords}</dd>
           <dt>Mod operasi</dt><dd>${Native.isApp() ? 'Aplikasi Android (APK)' : location.protocol === 'file:' ? 'Fail terus (file://)' : 'Pelayar web'}</dd>
@@ -905,7 +907,7 @@ async function checkUpcomingClasses() {
 
 /* ---------------- Permulaan ---------------- */
 async function init() {
-  document.getElementById('appVersion').textContent = `Versi ${APP_VERSION}`;
+  document.getElementById('appVersion').innerHTML = `Versi ${APP_VERSION}<br>${U.esc(APP_COPYRIGHT)}`;
   updateToday(); updateNetBadge();
   setInterval(updateToday, 60000);
   window.addEventListener('online', updateNetBadge);

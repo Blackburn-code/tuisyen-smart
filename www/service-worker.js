@@ -5,7 +5,7 @@
    ========================================================= */
 'use strict';
 
-const CACHE_VERSION = 'tuisyen-smart-v3';
+const CACHE_VERSION = 'tuisyen-smart-v4';
 
 const APP_SHELL = [
   './',

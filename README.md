@@ -78,3 +78,7 @@ Buka `http://localhost:8080` dalam Chrome atau Edge. Untuk pasang sebagai aplika
 ## Keselamatan
 
 Aplikasi tidak menghantar data ke mana-mana pelayan dan tidak mempunyai kata laluan. Gunakan kunci skrin peranti. Fail sandaran mengandungi maklumat peribadi pelajar — simpan di tempat selamat.
+
+## Hak cipta
+
+© 2026 Abu Hanifah bin Rozali. Hak cipta terpelihara. Lihat fail `LICENSE`.

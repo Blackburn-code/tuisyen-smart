@@ -50,7 +50,7 @@ const Billing = {
       const name = Catalog.enrollName(e, ctx.subjMap, ctx.pkgMap);
       const period = U.monthLabel(monthKey);
       if (e.rateType === 'bulanan' || e.rateType === 'pakej') {
-        items.push({ description: `${e.type === 'pakej' ? 'Pakej ' : ''}${name} — ${period}`, qty: 1, unitSen: e.rateSen,
+        items.push({ description: `${e.type === 'pakej' && !/^pakej/i.test(name) ? 'Pakej ' : ''}${name} — ${period}`, qty: 1, unitSen: e.rateSen,
           amountSen: e.rateSen, chargeType: e.rateType, enrollmentId: e.id });
       } else if (e.rateType === 'kelas') {
         const n = held.filter(c => c.subjectId === e.subjectId).length;
@@ -147,7 +147,7 @@ const Billing = {
             const empty = Array.from(rows.children).filter(r => !r.querySelector('[name=desc]').value && !r.querySelector('[name=unit]').value);
             empty.forEach(r => r.remove());
             act.forEach(x => rows.insertAdjacentHTML('beforeend', rowHTML({
-              description: `${x.type === 'pakej' ? 'Pakej ' : ''}${Catalog.enrollName(x, subjMap, pkgMap)} (${Catalog.rateLabel(x.rateType)})`,
+              description: `${x.type === 'pakej' && !/^pakej/i.test(Catalog.enrollName(x, subjMap, pkgMap)) ? 'Pakej ' : ''}${Catalog.enrollName(x, subjMap, pkgMap)} (${Catalog.rateLabel(x.rateType)})`,
               qty: 1, unitSen: x.rateSen })));
             recalc();
           }

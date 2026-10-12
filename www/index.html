@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1e56a0">
+  <meta name="description" content="Tuisyen Smart - Sistem Pengurusan Tuisyen Persendirian Offline">
+  <title>Tuisyen Smart</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="overlay" id="overlay" hidden></div>
+
+  <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+    <div class="brand">
+      <img src="icons/icon.svg" alt="" class="brand-logo" width="40" height="40">
+      <div class="brand-text">
+        <strong>Tuisyen Smart</strong>
+        <span id="brandSub">Pengurusan Tuisyen</span>
+      </div>
+      <button class="icon-btn sidebar-close" id="sidebarClose" aria-label="Tutup menu">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot">
+      <span id="appVersion"></span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <span class="topbar-app">Tuisyen Smart</span>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <span class="today-label" id="todayLabel"></span>
+        <span class="net-badge" id="netBadge"></span>
+      </div>
+    </header>
+
+    <div id="banner"></div>
+    <main id="view" class="content" tabindex="-1">
+      <div class="loading">Memuatkan…</div>
+    </main>
+  </div>
+
+  <div id="toastArea" class="toast-area" aria-live="polite"></div>
+  <div id="modalRoot"></div>
+
+  <noscript>
+    <div class="noscript">Tuisyen Smart memerlukan JavaScript. Sila aktifkan JavaScript dalam pelayar anda.</div>
+  </noscript>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <!-- Jika fail lain (app.js, db.js, style.css) gagal dimuatkan, terangkan sebabnya -->
+  <script>
+    window.addEventListener('load', function () {
+      if (typeof DB !== 'undefined' && typeof route !== 'undefined') return;
+      document.body.innerHTML =
+        '<div style="font-family:system-ui,sans-serif;padding:24px;max-width:540px;margin:0 auto;line-height:1.6;color:#1d2733">' +
+        '<h2 style="color:#1e56a0;margin:0 0 12px">Tuisyen Smart tidak dapat dimuatkan</h2>' +
+        '<p>Fail <b>index.html</b> dibuka terus (alamat <b>' + location.protocol + '</b>). Dengan cara ini pelayar tidak dapat membaca fail lain dalam folder yang sama (style.css, app.js, db.js), dan tidak dapat menyimpan data.</p>' +
+        '<p><b>Cara buka yang betul:</b></p>' +
+        '<ol style="padding-left:20px">' +
+        '<li><b>Android:</b> muat naik folder ke hosting percuma (cth. Netlify Drop / GitHub Pages), buka pautan https dalam Chrome, kemudian menu &#8942; &rarr; Pasang aplikasi.</li>' +
+        '<li><b>PC:</b> jalankan <code>python -m http.server 8080</code> dalam folder ini, kemudian buka http://localhost:8080</li>' +
+        '</ol><p>Arahan penuh ada dalam README.md.</p></div>';
+    });
+  </script>
+</body>
+</html>

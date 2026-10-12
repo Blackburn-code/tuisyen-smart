@@ -1,0 +1,8 @@
+{
+  "appId": "com.blackburn.tuisyensmart",
+  "appName": "Tuisyen Smart",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
